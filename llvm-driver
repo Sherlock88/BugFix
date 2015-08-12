@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Turned out that llvm-gcc, llvm-ld and llvmc rely heavily on file extension.
+# The simple experiment below reveals the inconsistency.
+#
+# 1. Create a simple "Hello World" program (hello.c) in C.
+# 2. Compile: llvm-gcc -c -emit-llvm hello.c
+#    Output : Bitcode (hello.o) file gets generated
+# 3. Link   : llvm-gcc -emit-llvm hello.o -o hello
+#    Output : hello.o: file not recognized: File format not recognized
+#             collect2: ld returned 1 exit status
+#             Evidently, GNU ld is called because of input file having .o extension
+# 4. Link   : llvmc hello.o -o hello
+#    Output : hello.o: file not recognized: File format not recognized
+#             collect2: ld returned 1 exit status
+#             Evidently, GNU ld is called because of input file having .o extension
+# 5. Link   : llvm-ld hello.o -o hello
+#    Output : Bitcode (hello.bc) file and a driver shell script (hello) get generated
+# 6. Delete : rm -f hello.bc hello
+# 7. Rename : mv hello.o hello.bc
+# 8. Link   : llvm-gcc -emit-llvm hello.bc -o hello
+#    Output : hello.o: file not recognized: File format not recognized
+#             collect2: ld returned 1 exit status
+#             Evidently, GNU ld is called in spite of input file having .bc extension
+# 9. Link   : llvmc hello.bc -o hello
+#    Output : Native executable (hello) gets generated
+
+
+# Set debug printing ON/OFF
+LLD_DEBUG="on"
+
+args=`echo $* | sed "s/\"[^=]*\"/\'&\'/g"`
+
+# echo "-Wl " | grep -c <pattern> => 1
+# echo " -Wl " | grep -c <pattern> => 1
+# echo " -Wl" | grep -c <pattern> => 1
+# echo "-Wl" | grep -c <pattern> => 1
+# echo "-Wl1 " | grep -c <pattern> => 0
+# echo " -Wl1" | grep -c <pattern> => 0
+# echo " -Wl1 " | grep -c <pattern> => 0
+# echo "-Wl1" | grep -c <pattern> => 1
+is_linker=$(echo $args | grep -c "^\-Wl \| \-Wl$\| \-Wl \|^\-Wl$")
+
+if (($is_linker > 0))
+then
+	args_llvm_ld=$(echo $args | sed 's/-Wl\|-Wall//g')
+	cmd="llvm-ld "$args_llvm_ld
+else
+	cmd="llvm-gcc -emit-llvm -g -O0 "$args
+fi
+
+if [ $LLD_DEBUG = "on" ]
+then
+	echo "[llvm-driver] "$cmd
+fi
+
+# http://stackoverflow.com/questions/4668640/how-to-execute-command-stored-in-a-variable
+eval "$cmd"
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Why setting these environment variables?
+# CC                => 'llvm-driver' dispatches call to either llvm-gcc or llvm-ld depending on the arguments
+# AR                => LLVM version of 'ar'
+# RANLIB            => LLVM version of 'ranlib'
+# CONFIGURE_LDFLAGS => Flagging a call to 'llvm-ld' instead of 'llvm-gcc'
+# OPT               => Spit out all compiler warnings
+# INSTALL           => Don't really need to install untilites, an always true dummy argument
+# RUNSHARED         => Suppress building of shared modules by MAkefile rule 'sharedmods'
+# PATH              => Don't need to prepend './' before every call to 'llvm-driver', aesthetic purpose only
+export CC="llvm-driver" AR="llvm-ar" RANLIB="llvm-ranlib" CONFIGURE_LDFLAGS="-Wl" OPT="-Wall" INSTALL="true" RUNSHARED="true" PATH=$PATH:.
+
+# To generate the list of rules 'make' is going to trigger
+# in the file 'make_dry_run'. Debugging aid to check progress.
+make -e --dry-run > make_dry_run
+
+# Trigger make to build the subject.
+# '-e' argument gives variables taken from the shell
+# environment precedence over variables from makefiles.
+make -e

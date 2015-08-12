@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Set the variables as per your choice and environment
+AF_ROOT=~/angelicfix	# AngelicFix root directory
+FROM_VER=69223		# Version number of buggy version
+TO_VER=69224		# Version number of fixed version
+
+# Set up environment
+export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+source $AF_ROOT/activate
+
+# Download and extract buggy Python version
+PYTHON_DIR="python-bug-"$FROM_VER"-"$TO_VER
+PYTHON_ARCHIVE=$PYTHON_DIR".tar.gz"
+PYTHON_ARCHIVE_URL="http://dijkstra.cs.virginia.edu/genprog/resources/genprog-icse2012-benchmarks/"$PYTHON_ARCHIVE
+
+if [ ! -f $PYTHON_ARCHIVE ]; then
+	wget $PYTHON_ARCHIVE_URL
+fi
+
+if [ ! -d $PYTHON_DIR ]; then
+	tar -xvf $PYTHON_ARCHIVE
+fi
+
+# Configure and prepare Makefile
+cp llvm-driver compile-sh $PYTHON_DIR/python
+cd $PYTHON_DIR/python
+chmod 777 llvm-driver
+chmod 777 compile-sh
+make distclean
+./configure --disable-shared
+
+# Patch Makefile to prevent execution of Parsen/pgen$(EXE)
+# $(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+sed -i "s/\(		\)\(.(PGEN)\)/\1#\2/" Makefile
+
+# Prompt to replace the fixed version(s) with the buggy one(s)
+# from $PYTHON_DIR/diffs to appropriate location(s)
+echo "Replace the fixed version(s) with the buggy one(s) from $PYTHON_DIR/diffs to appropriate location(s)"
+read -p "Press any key to continue once you are done." -n1 -s
+
+# Build the buggy version of Python
+./compile-sh
