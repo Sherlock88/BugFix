@@ -42,3 +42,16 @@ read -p "Press any key to continue once you are done." -n1 -s
 
 # Build the buggy version of Python
 ./compile-sh 2>&1 | tee error_log
+
+# Get convinced that the build works with KLEE
+# Python help should be displayed
+if [ -f "python.bc" ]; then
+	echo -e '\033[0;32m'*********************************'\033[0m'
+	echo -e '\033[0;32m'* Build succeeded! Running KLEE *'\033[0m'
+	echo -e '\033[0;32m'*********************************'\033[0m'
+	klee --libc=uclibc --posix-runtime python.bc -h
+else
+	echo -e '\033[0;31m'*****************'\033[0m'
+	echo -e '\033[0;31m'* Build failed! *'\033[0m'
+	echo -e '\033[0;31m'*****************'\033[0m'
+fi

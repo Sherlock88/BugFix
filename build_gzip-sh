@@ -41,4 +41,14 @@ read -p "Press any key to continue once you are done." -n1 -s
 
 # Get convinced that the build works with KLEE
 # gzip help should be displayed
-klee --libc=uclibc --posix-runtime gzip.bc -h
+if [ -f "gzip.bc" ]; then
+	echo -e '\033[0;32m'*********************************'\033[0m'
+	echo -e '\033[0;32m'* Build succeeded! Running KLEE *'\033[0m'
+	echo -e '\033[0;32m'*********************************'\033[0m'
+	klee --libc=uclibc --posix-runtime gzip.bc -h
+else
+	echo -e '\033[0;31m'*****************'\033[0m'
+	echo -e '\033[0;31m'* Build failed! *'\033[0m'
+	echo -e '\033[0;31m'*****************'\033[0m'
+fi
+
