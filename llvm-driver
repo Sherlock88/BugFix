@@ -39,7 +39,11 @@ args=`echo $* | sed "s/\"[^=]*\"/\'&\'/g"`
 # echo " -Wl1" | grep -c <pattern> => 0
 # echo " -Wl1 " | grep -c <pattern> => 0
 # echo "-Wl1" | grep -c <pattern> => 1
-is_linker=$(echo $args | grep -c "^\-Wl \| \-Wl$\| \-Wl \|^\-Wl$\|\.o \|.o$")
+is_linker=$(echo $args | grep -c "^\-Wl \| \-Wl$\| \-Wl \|^\-Wl$")
+if (($is_linker == 0))
+then
+	is_linker=$(echo $args | grep ".o \|.o$" | grep -c -v "\-c \|\-c$")
+fi
 
 if (($is_linker > 0))
 then
