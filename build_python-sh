@@ -29,7 +29,7 @@ cd $PYTHON_DIR/python
 chmod 777 llvm-driver
 chmod 777 compile-sh
 make distclean
-./configure --disable-shared
+./configure --disable-shared --without-threads
 
 # Patch Makefile to prevent execution of Parsen/pgen$(EXE)
 # $(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
