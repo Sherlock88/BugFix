@@ -39,11 +39,11 @@ args=`echo $* | sed "s/\"[^=]*\"/\'&\'/g"`
 # echo " -Wl1" | grep -c <pattern> => 0
 # echo " -Wl1 " | grep -c <pattern> => 0
 # echo "-Wl1" | grep -c <pattern> => 1
-is_linker=$(echo $args | grep -c "^\-Wl \| \-Wl$\| \-Wl \|^\-Wl$")
+is_linker=$(echo $args | grep -c "^\-Wl \| \-Wl$\| \-Wl \|^\-Wl$\|\.o \|.o$")
 
 if (($is_linker > 0))
 then
-	args_llvm_ld=$(echo $args | sed 's/-Wl\|-Wall//g')
+	args_llvm_ld=$(echo $args | sed 's/-Wl\|-Wall\|-g\|-O.//g')
 	cmd="llvm-ld "$args_llvm_ld
 else
 	cmd="llvm-gcc -emit-llvm -g -O0 "$args

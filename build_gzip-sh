@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Set the variables as per your choice and environment
+AF_ROOT=~/angelicfix		# AngelicFix root directory
+FROM_VER=a1d3d4019ddd22		# Version number of buggy version
+TO_VER=f17cbd13a1d0a7		# Version number of fixed version
+
+# Set up environment
+export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+source $AF_ROOT/activate
+
+# Download and extract buggy Python version
+GZIP_DIR="gzip-bug-"$FROM_VER"-"$TO_VER
+GZIP_ARCHIVE=$GZIP_DIR".tar.gz"
+GZIP_ARCHIVE_URL="http://dijkstra.cs.virginia.edu/genprog/resources/genprog-icse2012-benchmarks/"$GZIP_ARCHIVE
+
+if [ ! -f $GZIP_ARCHIVE ]; then
+	wget $GZIP_ARCHIVE_URL
+fi
+
+if [ ! -d $GZIP_DIR ]; then
+	tar -xvf $GZIP_ARCHIVE
+fi
+
+# Configure and prepare Makefile
+cp llvm-driver compile-sh $GZIP_DIR/gzip
+cd $GZIP_DIR/gzip
+chmod 777 llvm-driver
+chmod 777 compile-sh
+make distclean
+./configure
+
+# Prompt to replace the fixed version(s) with the buggy one(s)
+# from $GZIP_DIR/diffs to appropriate location(s)
+echo "Replace the fixed version(s) with the buggy one(s) from $GZIP_DIR/diffs to appropriate location(s)"
+read -p "Press any key to continue once you are done." -n1 -s
+
+# Build the buggy version of gzip
+./compile-sh 2>&1 | tee error_log
+
+# Get convinced that the build works with KLEE
+# gzip help should be displayed
+klee --libc=uclibc --posix-runtime gzip.bc -h
