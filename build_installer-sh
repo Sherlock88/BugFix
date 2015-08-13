@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Creates a self-extracting (SFX) build script
+# containing files required to build a subject
+# Requires: http://stephanepeter.com/makeself
+
+SUBJECT="gzip"
+SFX_FILES="build_"$SUBJECT"-sh compile-sh llvm-driver"
+
+MAKESELF_DIR=`ls -1 -d */ | grep "makeself-.*"`
+if [ -z "$MAKESELF_DIR" ]; then
+	MAKESELF_SCRIPT=`ls -1 | grep "makeself-.*.run"`
+	if [ ! -f "$MAKESELF_SCRIPT" ]; then
+		wget "http://cdn.megastep.org/makeself/makeself-2.2.0.run"
+		MAKESELF_SCRIPT="makeself-2.2.0.run"
+	fi
+	MAKESELF_DIR=`basename -s ".run" $MAKESELF_SCRIPT`
+	chmod 777 $MAKESELF_SCRIPT
+	./$MAKESELF_SCRIPT
+fi
+
+mkdir payload
+cp $SFX_FILES payload
+chmod 777 $MAKESELF_DIR/makeself.sh
+$MAKESELF_DIR/makeself.sh --current $PWD/payload "build_"$SUBJECT"_sfx-sh" "Script to automate build of "$SUBJECT" using LLVM to be run on top of KLEE" ./"build_"$SUBJECT"-sh"
+rm -rf payload
