@@ -9,7 +9,7 @@
 # INSTALL           => Don't really need to install untilites, an always true dummy argument
 # RUNSHARED         => Suppress building of shared modules by MAkefile rule 'sharedmods'
 # PATH              => Don't need to prepend './' before every call to 'llvm-driver', aesthetic purpose only
-export CC="llvm-driver" AR="llvm-ar" RANLIB="llvm-ranlib" CONFIGURE_LDFLAGS="-Wl" OPT="-Wall" INSTALL="true" RUNSHARED="true" PATH=$PATH:.
+export CC="llvm-driver" AR="llvm-ar" RANLIB="llvm-ranlib" CONFIGURE_LDFLAGS="-Wl" OPT="-Wall" INSTALL="true" RUNSHARED="true" PATH=$PATH:$PWD
 
 # To generate the list of rules 'make' is going to trigger
 # in the file 'make_dry_run'. Debugging aid to check progress.

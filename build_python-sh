@@ -41,4 +41,4 @@ echo "Replace the fixed version(s) with the buggy one(s) from $PYTHON_DIR/diffs 
 read -p "Press any key to continue once you are done." -n1 -s
 
 # Build the buggy version of Python
-./compile-sh
+./compile-sh 2>&1 | tee error_log
