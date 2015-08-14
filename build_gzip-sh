@@ -43,14 +43,23 @@ chmod 777 compile-sh
 make distclean
 ./configure
 
-# Prompt to replace the fixed version(s) with the buggy one(s)
+# Replace the fixed version(s) with the buggy one(s)
 # from $GZIP_DIR/diffs to appropriate location(s)
 echo
 echo -e '\033[1;33m'***********************'\033[0m'
 echo -e '\033[1;33m'* Replace source code *'\033[0m'
 echo -e '\033[1;33m'***********************'\033[0m'
-echo "Replace the fixed version(s) with the buggy one(s) from $GZIP_DIR/diffs to appropriate location(s)"
-read -p "Press any key to continue once you are done." -n1 -s
+# echo "Replace the fixed version(s) with the buggy one(s) from $GZIP_DIR/diffs to appropriate location(s)"
+# read -p "Press any key to continue once you are done." -n1 -s
+function replace_annotated_source() {
+	annotated_source_path="$( cut -d '/' -f 3- <<< "$1" )";
+	original_source_path="$( echo $annotated_source_path | sed "s/-.*//" )"
+	rm -f "$original_source_path"
+	cp ../diffs/"$annotated_source_path" "$original_source_path"
+}
+
+export -f replace_annotated_source
+find ../diffs -name "*-$FROM_VER" -print | xargs bash -c 'replace_annotated_source "$@"' _
 
 # Build the buggy version of gzip
 echo -e "\n"
