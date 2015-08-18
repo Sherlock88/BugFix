@@ -77,7 +77,6 @@ if [ -f ".libs/libgmp.a" ]; then
 	echo -e '\033[0;32m'*********************************'\033[0m'
 	echo -e '\033[0;32m'* Build succeeded! Running KLEE *'\033[0m'
 	echo -e '\033[0;32m'*********************************'\033[0m'
-	touch $GMP_DRIVER
 	echo "#include <iostream>" > $GMP_DRIVER
 	echo "#include <gmp.h>" >> $GMP_DRIVER
 	echo >> $GMP_DRIVER
