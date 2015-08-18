@@ -3,7 +3,8 @@
 # Set the variables as per your choice and environment
 AF_ROOT=~/angelicfix		# AngelicFix root directory
 FROM_VER=14166			# Version number of buggy version
-TO_VER=14167		# Version number of fixed version
+TO_VER=14167			# Version number of fixed version
+GMP_DRIVER="gmp_demo.cpp"	# GMP library driver program source code
 
 # Set up environment
 export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
@@ -76,7 +77,24 @@ if [ -f ".libs/libgmp.a" ]; then
 	echo -e '\033[0;32m'*********************************'\033[0m'
 	echo -e '\033[0;32m'* Build succeeded! Running KLEE *'\033[0m'
 	echo -e '\033[0;32m'*********************************'\033[0m'
-	#klee --libc=uclibc --posix-runtime gmp.bc -h
+	touch $GMP_DRIVER
+	echo "#include <iostream>" > $GMP_DRIVER
+	echo "#include <gmp.h>" >> $GMP_DRIVER
+	echo >> $GMP_DRIVER
+	echo "using namespace std;" >> $GMP_DRIVER
+	echo >> $GMP_DRIVER
+	echo "int main(int argc, char* argv[]) {" >> $GMP_DRIVER
+	echo "	cout << \"At main() method, the entry point\n\";" >> $GMP_DRIVER
+	echo "	mpz_t result, base;" >> $GMP_DRIVER
+	echo "	mpz_inits(result,base,NULL);" >> $GMP_DRIVER
+	echo "	mpz_set_str(base, \"2\", 10);" >> $GMP_DRIVER
+	echo "	mpz_pow_ui(result, base, 20000);" >> $GMP_DRIVER
+	echo "	mpz_out_str(stdout, 10, result);" >> $GMP_DRIVER
+	echo "	return 0;" >> $GMP_DRIVER
+	echo "}" >> $GMP_DRIVER
+	llvm-gcc -c -emit-llvm gmp_demo.cpp -I .
+	llvm-ld gmp_demo.o -L .libs -lgmp -o gmp_demo
+	klee --libc=uclibc --posix-runtime gmp_demo.bc
 else
 	echo
 	echo -e '\033[0;31m'*****************'\033[0m'
