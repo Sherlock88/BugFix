@@ -40,9 +40,8 @@ cp llvm-driver compile-sh $GMP_DIR/gmp
 cd $GMP_DIR/gmp
 chmod 777 llvm-driver
 chmod 777 compile-sh
-#make distclean
-#autoreconf --force --install
-make clean
+make distclean
+autoreconf --force --install
 ./configure --disable-shared --disable-static
 
 # Replace the fixed version(s) with the buggy one(s)
