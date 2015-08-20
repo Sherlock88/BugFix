@@ -45,6 +45,13 @@ make distclean
 autoreconf --force --install
 ./configure --disable-shared --disable-static
 
+# Patch Makefile to disable inline assembly
+echo
+echo -e '\033[1;33m'**********************'\033[0m'
+echo -e '\033[1;33m'* Pathching Makefile *'\033[0m'
+echo -e '\033[1;33m'**********************'\033[0m'
+sed -i 's/#if ! defined (NO_ASM)/#define NO_ASM\n&/' longlong.h
+
 # Replace the fixed version(s) with the buggy one(s)
 # from $GMP_DIR/diffs to appropriate location(s)
 echo
