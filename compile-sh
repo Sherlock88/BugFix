@@ -13,7 +13,7 @@ export CC="llvm-driver" AR="llvm-ar" RANLIB="llvm-ranlib" CONFIGURE_LDFLAGS="-Wl
 
 # To generate the list of rules 'make' is going to trigger
 # in the file 'make_dry_run'. Debugging aid to check progress.
-make -e --dry-run > make_dry_run
+make -e --dry-run 2>&1 | tee make_dry_run
 
 # Trigger make to build the subject.
 # '-e' argument gives variables taken from the shell
