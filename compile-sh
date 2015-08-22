@@ -18,4 +18,4 @@ make -e --dry-run 2>&1 | tee make_dry_run
 # Trigger make to build the subject.
 # '-e' argument gives variables taken from the shell
 # environment precedence over variables from makefiles.
-make -e
+make -e 2>&1 | tee make_run
