@@ -43,12 +43,12 @@ chmod 777 llvm-driver
 chmod 777 compile-sh
 make distclean
 autoreconf --force --install
-./configure --disable-shared --disable-static
+./configure --disable-assembly --disable-fat --disable-shared --disable-static --disable-fft
 
 # Patch Makefile to disable inline assembly
 echo
 echo -e '\033[1;33m'**********************'\033[0m'
-echo -e '\033[1;33m'* Pathching Makefile *'\033[0m'
+echo -e '\033[1;33m'* Patching Makefile *'\033[0m'
 echo -e '\033[1;33m'**********************'\033[0m'
 sed -i 's/#if ! defined (NO_ASM)/#define NO_ASM\n&/' longlong.h
 
@@ -75,7 +75,7 @@ echo -e "\n"
 echo -e '\033[1;33m'**********************'\033[0m'
 echo -e '\033[1;33m'* Build the target *'\033[0m'
 echo -e '\033[1;33m'**********************'\033[0m'
-./compile-sh 2>&1 | tee error_log
+./compile-sh
 
 # Get convinced that the build works with KLEE
 # gmp help should be displayed
@@ -90,17 +90,18 @@ if [ -f ".libs/libgmp.a" ]; then
 	echo "using namespace std;" >> $GMP_DRIVER
 	echo >> $GMP_DRIVER
 	echo "int main(int argc, char* argv[]) {" >> $GMP_DRIVER
-	echo "	cout << \"At main() method, the entry point\n\";" >> $GMP_DRIVER
+	echo "	cout << \"Entering main()\n\";" >> $GMP_DRIVER
 	echo "	mpz_t result, base;" >> $GMP_DRIVER
 	echo "	mpz_inits(result,base,NULL);" >> $GMP_DRIVER
 	echo "	mpz_set_str(base, \"2\", 10);" >> $GMP_DRIVER
-	echo "	mpz_pow_ui(result, base, 20000);" >> $GMP_DRIVER
+	echo "	mpz_pow_ui(result, base, 20);" >> $GMP_DRIVER
 	echo "	mpz_out_str(stdout, 10, result);" >> $GMP_DRIVER
+	echo "	cout << \"\nExiting main()\n\";" >> $GMP_DRIVER
 	echo "	return 0;" >> $GMP_DRIVER
 	echo "}" >> $GMP_DRIVER
 	llvm-gcc -c -emit-llvm gmp_demo.cpp -I .
 	llvm-ld gmp_demo.o -L .libs -lgmp -o gmp_demo
-	klee --libc=uclibc --posix-runtime gmp_demo.bc
+	klee -libc=uclibc -posix-runtime -allow-external-sym-calls gmp_demo.bc
 else
 	echo
 	echo -e '\033[0;31m'*****************'\033[0m'
