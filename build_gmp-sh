@@ -43,7 +43,7 @@ chmod 777 llvm-driver
 chmod 777 compile-sh
 make distclean
 autoreconf --force --install
-./configure --disable-assembly --disable-fat --disable-shared --disable-static --disable-fft
+./configure --disable-assembly --disable-fat --disable-shared --disable-static --disable-fft 2>&1 | tee log_configure
 
 # Patch Makefile to disable inline assembly
 echo

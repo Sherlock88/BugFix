@@ -41,7 +41,7 @@ cd $GZIP_DIR/gzip
 chmod 777 llvm-driver
 chmod 777 compile-sh
 make distclean
-./configure
+./configure 2>&1 | tee log_configure
 
 # Replace the fixed version(s) with the buggy one(s)
 # from $GZIP_DIR/diffs to appropriate location(s)
